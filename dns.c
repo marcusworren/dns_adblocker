@@ -22,12 +22,10 @@ void load_blocklist(const char *filename) {
     char line[256];
     int index = 0;
     while (fgets(line, sizeof(line), file)) {
-        // Skip comments and empty lines
         if (line[0] == '#' || strlen(line) <= 1) {
             continue;
         }
 
-        // We are interested in lines starting with "0.0.0.0"
         if (strncmp(line, "0.0.0.0", 7) == 0) {
             char* domain = strtok(line + 8, " \t\n"); // Extract the domain
             if (domain) {
@@ -36,7 +34,6 @@ void load_blocklist(const char *filename) {
             }
         }
 
-        // Check if the blocklist array is full
         if (index >= MAX_BLOCKLIST_SIZE) {
             break;
         }
@@ -50,10 +47,10 @@ void load_blocklist(const char *filename) {
 int is_blocked(const char* domain) {
     for (int i = 0; i < MAX_BLOCKLIST_SIZE && blocklist[i] != NULL; i++) {
         if (strcmp(domain, blocklist[i]) == 0) {
-            return 1; // Blocked
+            return 1; 
         }
     }
-    return 0; // Not blocked
+    return 0; 
 }
 
 // Function to extract domain name from DNS query
@@ -70,7 +67,7 @@ void extract_domain(unsigned char* dns_query, char* domain) {
         domain[j++] = '.';
     }
 
-    domain[j - 1] = '\0'; // Remove the last '.' added
+    domain[j - 1] = '\0'; 
 }
 
 // Function to handle DNS query
@@ -87,11 +84,10 @@ void handle_dns_query(int sockfd, struct sockaddr_in *client_addr, char *buffer)
         memset(response, 0, sizeof(response));
 
         // Copy the original query to the response
-        memcpy(response, buffer, 12); // DNS header
-        response[2] = 0x81;  // Flags: standard query response, no error
-        response[3] = 0x83;  // Flags: no such name
+        memcpy(response, buffer, 12);
+        response[2] = 0x81;  
+        response[3] = 0x83;  
 
-        // Send the blocked response back to the client
         sendto(sockfd, response, 12, 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 
     } else {
